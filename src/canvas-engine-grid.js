@@ -11,6 +11,7 @@
             Validator = CE.Validator,
             CanvasLayer = CE.CanvasLayer;
 
+
         var CanvasEngineGrid = function(options){
             var self = this;
             self.selectable = false;
