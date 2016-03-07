@@ -1,0 +1,19 @@
+{
+  "name": "canvas-engine-grid",
+  "homepage": "https://github.com/pablohenrickdiniz/canvas-engine-grid",
+  "authors": [
+    "Pablo Henrick <phydokz@hotmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
