@@ -18,7 +18,6 @@
             self.multiSelect = false;
             self.areaSelect = null;
             self.gridLayer = null;
-            CanvasEngineGrid.bindProperties.apply(self);
             CanvasEngine.call(self,options);
             CanvasEngineGrid.initialize.apply(self);
         };
@@ -26,36 +25,6 @@
         CanvasEngineGrid.prototype = Object.create(CanvasEngine.prototype);
         CanvasEngineGrid.prototype.constructor = CanvasEngine;
 
-
-        CanvasEngineGrid.bindProperties = function(){
-            var self = this;
-            self._onChange('container', function (container) {
-                $(container).css({
-                    position: 'relative',
-                    overflow: 'hidden',
-                    width: self.width,
-                    height: self.height
-                }).addClass('transparent-background canvas-engine').on('contextmenu', function (e) {
-                    e.preventDefault();
-                });
-
-                $(container).find('canvas').each(function(){
-                    var data = $(this).data();
-                    if(data.type === 'grid-layer' && self.gridLayer === null){
-                        self.gridLayer = self.createLayer({element:this},GridLayer);
-                    }
-                    else{
-                        self.createLayer({element:this});
-                    }
-                });
-
-                self.getMouseReader().set({
-                    element: container
-                });
-
-                self.keyReader = null;
-            });
-        };
 
         CanvasEngineGrid.initialize = function(){
             var self = this;
@@ -148,7 +117,6 @@
             if (self.gridLayer === null) {
                 self.gridLayer = self.createLayer({
                     type: 'grid',
-                    append:options.append,
                     width:options.width,
                     height:options.height
                 }, CE.EXT.GridLayer);
@@ -178,7 +146,6 @@
             options.zIndex = self.layers.length;
             options.width = Validator.validateNumber(self.getWidth(), options.width);
             options.height = Validator.validateNumber(self.getHeight(), options.height);
-            options.append = options.append === undefined?true:options.append;
 
             if (ClassName !== undefined) {
                 layer = new ClassName(options, self);
@@ -201,10 +168,8 @@
                 });
             }
 
-            if(options.append){
-                if (self.container !== null && !$.contains(self.container,layer.getElement())) {
-                    $(self.container).append(layer.getElement());
-                }
+            if (self.container !== null && $(self.container).length > 0) {
+                $(self.container).append(layer.getElement());
             }
 
             return layer;
