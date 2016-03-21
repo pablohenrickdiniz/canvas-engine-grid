@@ -135,12 +135,17 @@
 
 
     CanvasEngineGrid.prototype.createLayer = function (options, ClassName) {
-        options = Validator.validateObject({}, options);
+        options = options === undefined?{}:options;
         var layer = null;
         var self = this;
         options.zIndex = self.layers.length;
-        options.width = Validator.validateNumber(self.getWidth(), options.width);
-        options.height = Validator.validateNumber(self.getHeight(), options.height);
+
+
+
+        var width = parseFloat(options.width);
+        var height = parseFloat(options.height);
+        options.width = isNaN(width)?self.getWidth():width;
+        options.height = isNaN(height)?self.getHeight():height;
 
         if (ClassName !== undefined) {
             layer = new ClassName(options, self);
