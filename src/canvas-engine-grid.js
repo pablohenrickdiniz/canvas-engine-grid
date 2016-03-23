@@ -295,6 +295,7 @@
             }
 
         }
+
         return self;
     };
 
@@ -303,13 +304,20 @@
         var self = this;
         self.rectSets = [];
         self.checkedSets = [];
+        self.drawCallback = null;
         AbstractGrid.call(self, options);
         Grid.bindProperties.apply(self);
     };
 
+
     Grid.prototype = Object.create(AbstractGrid.prototype);
     Grid.prototype.constructor = Grid;
 
+
+    Grid.prototype.drawCallback = function(callback){
+        var self = this;
+        self.drawCallback = callback;
+    };
 
     Grid.bindProperties = function () {
         var self = this;
@@ -455,16 +463,28 @@
 
     Grid.prototype.draw = function(context){
         var self = this;
-        self.rectSets.forEach(function (row) {
-            row.forEach(function (rectSet) {
-                context.fillStyle = rectSet.fillStyle;
-                context.strokeStyle = rectSet.strokeStyle;
-                context.setLineDash(rectSet.lineDash);
-                context.lineWidth = rectSet.lineWidth;
-                context.fillRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
-                context.strokeRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
-            });
-        });
+        var size1 = self.rectSets.length;
+        for(var i = 0; i < size1;i++){
+            var size2 = self.rectSets[i].length;
+            for(var j = 0; j < size2;j++){
+                var rectSet = self.rectSets[i][j];
+                if(rectSet.fillStyle !== 'transparent'){
+                    context.fillStyle = rectSet.fillStyle;
+                    context.fillRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
+                }
+
+                if(rectSet.strokeStyle !== 'transparent'){
+                    context.setLineDash(rectSet.lineDash);
+                    context.lineWidth = rectSet.lineWidth;
+                    context.strokeStyle = rectSet.strokeStyle;
+                    context.strokeRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
+                }
+                if(self.drawCallback !== null){
+                    self.drawCallback(rectSet,context);
+                }
+            }
+        }
+
         return self;
     };
 
