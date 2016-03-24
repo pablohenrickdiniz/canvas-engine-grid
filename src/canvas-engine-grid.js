@@ -314,7 +314,7 @@
     Grid.prototype.constructor = Grid;
 
 
-    Grid.prototype.drawCallback = function(callback){
+    Grid.prototype.ondrawcallback = function(callback){
         var self = this;
         self.drawCallback = callback;
     };
@@ -349,6 +349,16 @@
         var ej = parseInt(Math.floor((x + width) / self.sw));
         return {si: si, sj: sj, ei: ei, ej: ej};
 
+    };
+
+
+    Grid.prototype.get = function(i,j){
+        var self = this;
+        if(self.rectSets[i] !== undefined && self.rectSets[i][j] !== undefined){
+            return self.rectSets[i][j];
+        }
+
+        return null;
     };
 
     /*
@@ -480,7 +490,10 @@
                     context.strokeRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
                 }
                 if(self.drawCallback !== null){
+                    context.save();
                     self.drawCallback(rectSet,context);
+                    context.restore();
+
                 }
             }
         }
@@ -506,10 +519,17 @@
         //console.log('Canvas layer draw rect set...');
         var self = this;
         var context = self.getContext();
-        context.fillStyle = rectSet.fillStyle;
-        context.strokeStyle = rectSet.strokeStyle;
-        context.fillRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
-        context.strokeRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
+
+        if(rectSet.fillStyle !== 'transparent'){
+            context.fillStyle = rectSet.fillStyle;
+            context.fillRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
+        }
+
+        if(rectSet.strokeStyle !== 'transparent'){
+            context.strokeStyle = rectSet.strokeStyle;
+            context.strokeRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
+        }
+
         return self;
     };
 
