@@ -168,9 +168,8 @@
             });
         }
 
-        if (self.container !== null && $(self.container).length > 0) {
-            $(self.container).append(layer.getElement());
-        }
+        $(self.getAligner()).append(layer.getElement());
+
 
         return layer;
     };
@@ -338,10 +337,15 @@
 
     Grid.prototype.getAreaInterval = function (options) {
         var self = this;
-        var x = _.isNumber(options.x) ? options.x : 0;
-        var y = _.isNumber(options.y) ? options.y : 0;
-        var width = _.isNumber(options.width) ? options.width : 0;
-        var height = _.isNumber(options.height) ? options.height : 0;
+        var x = parseFloat(options.x);
+        var y = parseFloat(options.y);
+        var width = parseFloat(options.width);
+        var height = parseFloat(options.height);
+
+        x = isNaN(x) ? 0 : x;
+        y = isNaN(y) ?  0: y;
+        width = isNaN(width)?0:width;
+        height = isNaN(height)?0:height;
 
         var si = parseInt(Math.floor(y / self.sh));
         var sj = parseInt(Math.floor(x / self.sw));
