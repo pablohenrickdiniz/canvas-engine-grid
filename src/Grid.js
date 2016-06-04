@@ -2,10 +2,12 @@
     if(w.AbstractGrid == undefined){
         throw "Grid requires AbstractGrid"
     }
-    else if(w.Color == undefined){
+
+    if(w.Color == undefined){
         throw "Grid requires Color"
     }
-    else if(w.RectSet == undefined){
+
+    if(w.RectSet == undefined){
         throw "Grid requires RectSet"
     }
 
