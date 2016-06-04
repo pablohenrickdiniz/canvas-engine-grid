@@ -18,12 +18,19 @@
         self.parent = null;
         self.fillStyle = 'transparent';
         self.strokeStyle = '#000000';
+        self.checkedArea = null;
         AppObject.call(self);
         self.set(options);
     };
 
     AbstractGrid.prototype = Object.create(AppObject.prototype);
     AbstractGrid.prototype.constructor = AbstractGrid;
+
+    AbstractGrid.prototype.setCheckedArea = function(area){
+        var self = this;
+        self.checkedArea = area;
+
+    };
 
     AbstractGrid.prototype.isDrawable = function () {
         var self = this;
