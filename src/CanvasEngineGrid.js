@@ -9,51 +9,19 @@
         throw "CanvasEngineGrid requires Validator";
     }
 
-    var has_class = function(element, className){
-        return element.className.indexOf(className) != -1;
-    };
-
-    var add_class = function(element,className){
-        var original = element.className;
-        original = original.trim();
-        className = className.split(" ");
-        for(var i =0; i < className.length;i++){
-            if(!has_class(element,className[i])){
-                original += " "+className[i];
-            }
-        }
-        element.className = original;
-    };
-
     var CanvasEngineGrid = function(options){
         var self = this;
         self.selectable = false;
         self.multiSelect = false;
         self.areaSelect = null;
         self.gridLayer = null;
-        CanvasEngineGrid.bindProperties.apply(self);
         CE.call(self,options);
         CanvasEngineGrid.initialize.apply(self);
     };
 
     CanvasEngineGrid.prototype = Object.create(CE.prototype);
-    CanvasEngineGrid.prototype.constructor = CanvasEngineGrid;
+    CanvasEngineGrid.prototype.constructor = CE;
 
-    CanvasEngineGrid.bindProperties = function(){
-        var self = this;
-        self._onChange('container', function (container) {
-            container.style.position = 'relative';
-            container.style.overflow = 'hidden';
-            container.style.width = self.width+'px';
-            container.style.height = self.height+'px';
-            add_class(container,'transparent-background canvas-engine');
-            container.addEventListener("contextmenu",function(e){
-                e.preventDefault();
-            });
-            self.getMouseReader().setElement(container);
-            self.keyReader = null;
-        });
-    };
 
     CanvasEngineGrid.initialize = function(){
         var self = this;
@@ -62,11 +30,11 @@
         /*
          Calcula e redesenha um retângulo selecionado no tileset
          */
-        mouseReader.onmousedown(1, function () {
+        mouseReader.onmousedown(function () {
             if (self.selectable && typeof self.areaSelect === 'function') {
                 var reader = this;
                 var translate = {x: Math.abs(self.viewX / self.scale), y: Math.abs(self.viewY / self.scale)};
-                var pa = Math.vpv(Math.sdv(self.scale, reader.lastDown.left), translate);
+                var pa = Math.vpv(Math.sdv(self.scale, reader.lastdown.left), translate);
                 var area = {
                     x: pa.x,
                     y: pa.y
@@ -75,12 +43,12 @@
                 self.areaSelect.apply(self, [area, grid]);
                 self.getGridLayer().refresh();
             }
-        });
+        },'left');
 
         /*
          Calcula e redesenha uma área selecionada no tileset
          */
-        mouseReader.onmousemove(function (e) {
+        mouseReader.onmousemove(function () {
             if (self.multiSelect && self.selectable && typeof self.areaSelect === 'function') {
                 var reader = this;
                 var grid = self.getGridLayer().getGrid();
@@ -89,7 +57,7 @@
                     area = self.getDrawedArea();
                 }
                 else {
-                    area = Math.vpv(Math.sdv(self.scale, reader.lastMove), {
+                    area = Math.vpv(Math.sdv(self.scale, reader.lastmove), {
                         x: -self.viewX / self.scale,
                         y: -self.viewY / self.scale
                     });
@@ -108,8 +76,8 @@
         var self = this;
         var reader = self.getMouseReader();
         var translate = {x: -self.viewX / self.scale, y: -self.viewY / self.scale};
-        var pa = Math.vpv(Math.sdv(self.scale, reader.lastDown.left), translate);
-        var pb = Math.vpv(Math.sdv(self.scale, reader.lastMove), translate);
+        var pa = Math.vpv(Math.sdv(self.scale, reader.lastdown.left), translate);
+        var pb = Math.vpv(Math.sdv(self.scale, reader.lastmove), translate);
         var width = Math.abs(pb.x - pa.x);
         var height = Math.abs(pb.y - pa.y);
 
@@ -146,10 +114,9 @@
         if (self.gridLayer === null) {
             self.gridLayer = self.createLayer({
                 type: 'grid',
-                append:options.append,
                 width:options.width,
                 height:options.height
-            }, CE.EXT.GridLayer);
+            }, GridLayer);
         }
         return self.gridLayer;
     };
@@ -170,13 +137,17 @@
 
 
     CanvasEngineGrid.prototype.createLayer = function (options, ClassName) {
-        options = Validator.validateObject({}, options);
+        options = options === undefined?{}:options;
         var layer = null;
         var self = this;
         options.zIndex = self.layers.length;
-        options.width = Validator.validateNumber(self.getWidth(), options.width);
-        options.height = Validator.validateNumber(self.getHeight(), options.height);
-        options.append = options.append === undefined?true:options.append;
+
+
+
+        var width = parseFloat(options.width);
+        var height = parseFloat(options.height);
+        options.width = isNaN(width)?self.getWidth():width;
+        options.height = isNaN(height)?self.getHeight():height;
 
         if (ClassName !== undefined) {
             layer = new ClassName(options, self);
@@ -199,12 +170,8 @@
             });
         }
 
-        if(options.append){
-            var element = layer.getElement();
-            if (self.container !== null && !self.container.contains(element)) {
-                self.container.appendChild(element);
-            }
-        }
+        self.getAligner().appendChid(layer.getElement());
+
 
         return layer;
     };
@@ -219,7 +186,7 @@
         var self = this;
 
         var index = -1;
-        if (!(layer instanceof CE.EXT.GridLayer) && layer instanceof CanvasLayer) {
+        if (!(layer instanceof GridLayer) && layer instanceof CanvasLayer) {
             index = self.layers.indexOf(layer);
         }
         else if (Validator.isInt(layer) && self.layers[layer] !== undefined) {

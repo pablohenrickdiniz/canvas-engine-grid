@@ -15,6 +15,7 @@
     GridLayer.prototype = Object.create(CanvasLayer.prototype);
     GridLayer.prototype.constructor = GridLayer;
 
+
     /*
      GridLayer : drawRectSet(RectSet set)
      Desenha um retângulo da grade
@@ -23,10 +24,17 @@
         //console.log('Canvas layer draw rect set...');
         var self = this;
         var context = self.getContext();
-        context.fillStyle = rectSet.fillStyle;
-        context.strokeStyle = rectSet.strokeStyle;
-        context.fillRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
-        context.strokeRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
+
+        if(rectSet.fillStyle !== 'transparent'){
+            context.fillStyle = rectSet.fillStyle;
+            context.fillRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
+        }
+
+        if(rectSet.strokeStyle !== 'transparent'){
+            context.strokeStyle = rectSet.strokeStyle;
+            context.strokeRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
+        }
+
         return self;
     };
 
