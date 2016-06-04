@@ -215,4 +215,5 @@
         }
         return self;
     };
+    w.CanvasEngineGrid = CanvasEngineGrid;
 })(window);
