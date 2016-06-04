@@ -149,7 +149,7 @@
                 append:options.append,
                 width:options.width,
                 height:options.height
-            }, CE.GridLayer);
+            }, GridLayer);
         }
         return self.gridLayer;
     };
@@ -170,12 +170,17 @@
 
 
     CanvasEngineGrid.prototype.createLayer = function (options, ClassName) {
-        options = Validator.validateObject({}, options);
+        options = options == undefined?{}:options;
         var layer = null;
         var self = this;
         options.zIndex = self.layers.length;
-        options.width = Validator.validateNumber(self.getWidth(), options.width);
-        options.height = Validator.validateNumber(self.getHeight(), options.height);
+        var width = parseFloat(options.width);
+        var height = parseFloat(options.height);
+        width = isNaN(width)?self.getWidth():width;
+        height = isNaN(height)?self.getHeight():height;
+
+        options.width = width;
+        options.height = height;
         options.append = options.append === undefined?true:options.append;
 
         if (ClassName !== undefined) {
@@ -219,7 +224,7 @@
         var self = this;
 
         var index = -1;
-        if (!(layer instanceof CE.EXT.GridLayer) && layer instanceof CanvasLayer) {
+        if (!(layer instanceof GridLayer) && layer instanceof CanvasLayer) {
             index = self.layers.indexOf(layer);
         }
         else if (Validator.isInt(layer) && self.layers[layer] !== undefined) {
