@@ -1,5 +1,5 @@
 (function(w){
-    if(w.AppObject == undefine){
+    if(w.AppObject == undefined){
         throw "AbstractGrid requires AppObject"
     }
     else if(w.Color == undefined){
