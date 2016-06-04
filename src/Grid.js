@@ -5,6 +5,9 @@
     else if(w.Color == undefined){
         throw "Grid requires Color"
     }
+    else if(w.RectSet == undefined){
+        throw "Grid requires RectSet"
+    }
 
     var Grid = function (options) {
         console.log('initializing Grid...');
