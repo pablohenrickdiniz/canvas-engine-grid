@@ -62,11 +62,11 @@
         /*
          Calcula e redesenha um retângulo selecionado no tileset
          */
-        mouseReader.onmousedown(function () {
+        mouseReader.onmousedown(1, function () {
             if (self.selectable && typeof self.areaSelect === 'function') {
                 var reader = this;
                 var translate = {x: Math.abs(self.viewX / self.scale), y: Math.abs(self.viewY / self.scale)};
-                var pa = Math.vpv(Math.sdv(self.scale, reader.lastdown.left), translate);
+                var pa = Math.vpv(Math.sdv(self.scale, reader.lastDown.left), translate);
                 var area = {
                     x: pa.x,
                     y: pa.y
@@ -75,12 +75,12 @@
                 self.areaSelect.apply(self, [area, grid]);
                 self.getGridLayer().refresh();
             }
-        },'left');
+        });
 
         /*
          Calcula e redesenha uma área selecionada no tileset
          */
-        mouseReader.onmousemove(function () {
+        mouseReader.onmousemove(function (e) {
             if (self.multiSelect && self.selectable && typeof self.areaSelect === 'function') {
                 var reader = this;
                 var grid = self.getGridLayer().getGrid();
@@ -89,7 +89,7 @@
                     area = self.getDrawedArea();
                 }
                 else {
-                    area = Math.vpv(Math.sdv(self.scale, reader.lastmove), {
+                    area = Math.vpv(Math.sdv(self.scale, reader.lastMove), {
                         x: -self.viewX / self.scale,
                         y: -self.viewY / self.scale
                     });
@@ -108,8 +108,8 @@
         var self = this;
         var reader = self.getMouseReader();
         var translate = {x: -self.viewX / self.scale, y: -self.viewY / self.scale};
-        var pa = Math.vpv(Math.sdv(self.scale, reader.lastdown.left), translate);
-        var pb = Math.vpv(Math.sdv(self.scale, reader.lastmove), translate);
+        var pa = Math.vpv(Math.sdv(self.scale, reader.lastDown.left), translate);
+        var pb = Math.vpv(Math.sdv(self.scale, reader.lastMove), translate);
         var width = Math.abs(pb.x - pa.x);
         var height = Math.abs(pb.y - pa.y);
 
@@ -149,7 +149,7 @@
                 append:options.append,
                 width:options.width,
                 height:options.height
-            }, GridLayer);
+            }, CE.GridLayer);
         }
         return self.gridLayer;
     };
@@ -170,17 +170,12 @@
 
 
     CanvasEngineGrid.prototype.createLayer = function (options, ClassName) {
-        options = options == undefined?{}:options;
+        options = Validator.validateObject({}, options);
         var layer = null;
         var self = this;
         options.zIndex = self.layers.length;
-        var width = parseFloat(options.width);
-        var height = parseFloat(options.height);
-        width =isNaN(width)?self.getWidth():width;
-        height = isNaN(height)?self.getHeight():height;
-
-        options.width = width;
-        options.height = height;
+        options.width = Validator.validateNumber(self.getWidth(), options.width);
+        options.height = Validator.validateNumber(self.getHeight(), options.height);
         options.append = options.append === undefined?true:options.append;
 
         if (ClassName !== undefined) {
@@ -224,7 +219,7 @@
         var self = this;
 
         var index = -1;
-        if (!(layer instanceof GridLayer) && layer instanceof CanvasLayer) {
+        if (!(layer instanceof CE.EXT.GridLayer) && layer instanceof CanvasLayer) {
             index = self.layers.indexOf(layer);
         }
         else if (Validator.isInt(layer) && self.layers[layer] !== undefined) {
