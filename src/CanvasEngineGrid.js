@@ -181,8 +181,7 @@
             });
         }
 
-        $(self.getAligner()).append(layer.getElement());
-
+        self.getAligner().appendChild(layer.getElement());
 
         return layer;
     };
