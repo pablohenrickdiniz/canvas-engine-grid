@@ -9,19 +9,51 @@
         throw "CanvasEngineGrid requires Validator";
     }
 
+    var has_class = function(element, className){
+        return element.className.indexOf(className) != -1;
+    };
+
+    var add_class = function(element,className){
+        var original = element.className;
+        original = original.trim();
+        className = className.split(" ");
+        for(var i =0; i < className.length;i++){
+            if(!has_class(element,className[i])){
+                original += " "+className[i];
+            }
+        }
+        element.className = original;
+    };
+
     var CanvasEngineGrid = function(options){
         var self = this;
         self.selectable = false;
         self.multiSelect = false;
         self.areaSelect = null;
         self.gridLayer = null;
+        CanvasEngineGrid.bindProperties.apply(self);
         CE.call(self,options);
         CanvasEngineGrid.initialize.apply(self);
     };
 
     CanvasEngineGrid.prototype = Object.create(CE.prototype);
-    CanvasEngineGrid.prototype.constructor = CE;
+    CanvasEngineGrid.prototype.constructor = CanvasEngineGrid;
 
+    CanvasEngineGrid.bindProperties = function(){
+        var self = this;
+        self._onChange('container', function (container) {
+            container.style.position = 'relative';
+            container.style.overflow = 'hidden';
+            container.style.width = self.width+'px';
+            container.style.height = self.height+'px';
+            add_class(container,'transparent-background canvas-engine');
+            container.addEventListener("contextmenu",function(e){
+                e.preventDefault();
+            });
+            self.getMouseReader().setElement(container);
+            self.keyReader = null;
+        });
+    };
 
     CanvasEngineGrid.initialize = function(){
         var self = this;
@@ -114,6 +146,7 @@
         if (self.gridLayer === null) {
             self.gridLayer = self.createLayer({
                 type: 'grid',
+                append:options.append,
                 width:options.width,
                 height:options.height
             }, GridLayer);
@@ -137,17 +170,18 @@
 
 
     CanvasEngineGrid.prototype.createLayer = function (options, ClassName) {
-        options = options === undefined?{}:options;
+        options = options == undefined?{}:options;
         var layer = null;
         var self = this;
         options.zIndex = self.layers.length;
-
-
-
         var width = parseFloat(options.width);
         var height = parseFloat(options.height);
-        options.width = isNaN(width)?self.getWidth():width;
-        options.height = isNaN(height)?self.getHeight():height;
+        width =isNaN(width)?self.getWidth():width;
+        height = isNaN(height)?self.getHeight():height;
+
+        options.width = width;
+        options.height = height;
+        options.append = options.append === undefined?true:options.append;
 
         if (ClassName !== undefined) {
             layer = new ClassName(options, self);
@@ -170,8 +204,12 @@
             });
         }
 
-        self.getAligner().appendChid(layer.getElement());
-
+        if(options.append){
+            var element = layer.getElement();
+            if (self.container !== null && !self.container.contains(element)) {
+                self.container.appendChild(element);
+            }
+        }
 
         return layer;
     };
