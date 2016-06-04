@@ -1,9 +1,9 @@
 (function(w){
     if(w.CanvasLayer == undefined){
-        throw "GridLayer requires CanvasLayer";
+        throw "GridLayer requires CanvasLayer"
     }
     else if(w.Grid == undefined){
-        throw "GridLayer requires Grid";
+        throw "GridLayer requires Grid"
     }
 
     var GridLayer = function (options, canvas) {
@@ -23,10 +23,17 @@
         //console.log('Canvas layer draw rect set...');
         var self = this;
         var context = self.getContext();
-        context.fillStyle = rectSet.fillStyle;
-        context.strokeStyle = rectSet.strokeStyle;
-        context.fillRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
-        context.strokeRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
+
+        if(rectSet.fillStyle !== 'transparent'){
+            context.fillStyle = rectSet.fillStyle;
+            context.fillRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
+        }
+
+        if(rectSet.strokeStyle !== 'transparent'){
+            context.strokeStyle = rectSet.strokeStyle;
+            context.strokeRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
+        }
+
         return self;
     };
 

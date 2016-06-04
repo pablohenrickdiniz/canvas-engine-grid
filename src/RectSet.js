@@ -1,9 +1,9 @@
 (function(w){
     if(w.AppObject == undefined){
-        throw "RectSet requires AppObject";
+        throw "RectSet requires AppObject"
     }
     else if(w.Color == undefined){
-        throw "RectSet requires Color";
+        throw "RectSet requires Color"
     }
 
     var RectSet = function (options) {

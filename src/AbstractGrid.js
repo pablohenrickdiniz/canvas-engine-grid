@@ -1,9 +1,9 @@
 (function(w){
-    if(w.Color == undefined){
-        throw "AbstractGrid requires Color";
+    if(w.AppObject == undefine){
+        throw "AbstractGrid requires AppObject"
     }
-    else if(w.AppObject == undefined){
-        throw "AbstractGrid requires AppObject";
+    else if(w.Color == undefined){
+        throw "AbstractGrid requires Color"
     }
 
     var AbstractGrid = function (options) {
@@ -29,7 +29,6 @@
     AbstractGrid.prototype.setCheckedArea = function(area){
         var self = this;
         self.checkedArea = area;
-
     };
 
     AbstractGrid.prototype.isDrawable = function () {
@@ -42,7 +41,7 @@
         var self = this;
         if (self.isDrawable()) {
             context.fillStyle = 'transparent';
-            context.strokeStyle = (new Color({alpha: 0.2})).toRGBA();
+            context.strokeStyle = (new Color({alpha: 0.1})).toRGBA();
             context.lineWidth = 1;
             context.lineDash = [];
             var visibleArea = layer.getVisibleArea();
@@ -57,7 +56,15 @@
                     context.strokeRect((i * self.sw) + self.x, (j * self.sh) + self.y, self.sw, self.sh);
                 }
             }
+
+            if(self.checkedArea !== null){
+                var area = self.checkedArea;
+                context.strokeStyle = '#151515';
+                context.strokeRect(area.x,area.y,area.width,area.height);
+            }
+
         }
+
         return self;
     };
 

@@ -1,24 +1,30 @@
 (function(w){
     if(w.AbstractGrid == undefined){
-        throw "Grid requires AbstractGrid";
+        throw "Grid requires AbstractGrid"
     }
     else if(w.Color == undefined){
-        throw "Grid requires Color";
+        throw "Grid requires Color"
     }
-
 
     var Grid = function (options) {
         console.log('initializing Grid...');
         var self = this;
         self.rectSets = [];
         self.checkedSets = [];
+        self.drawCallback = null;
         AbstractGrid.call(self, options);
         Grid.bindProperties.apply(self);
     };
 
+
     Grid.prototype = Object.create(AbstractGrid.prototype);
     Grid.prototype.constructor = Grid;
 
+
+    Grid.prototype.ondrawcallback = function(callback){
+        var self = this;
+        self.drawCallback = callback;
+    };
 
     Grid.bindProperties = function () {
         var self = this;
@@ -39,10 +45,15 @@
 
     Grid.prototype.getAreaInterval = function (options) {
         var self = this;
-        var x = _.isNumber(options.x) ? options.x : 0;
-        var y = _.isNumber(options.y) ? options.y : 0;
-        var width = _.isNumber(options.width) ? options.width : 0;
-        var height = _.isNumber(options.height) ? options.height : 0;
+        var x = parseFloat(options.x);
+        var y = parseFloat(options.y);
+        var width = parseFloat(options.width);
+        var height = parseFloat(options.height);
+
+        x = isNaN(x) ? 0 : x;
+        y = isNaN(y) ?  0: y;
+        width = isNaN(width)?0:width;
+        height = isNaN(height)?0:height;
 
         var si = parseInt(Math.floor(y / self.sh));
         var sj = parseInt(Math.floor(x / self.sw));
@@ -50,6 +61,16 @@
         var ej = parseInt(Math.floor((x + width) / self.sw));
         return {si: si, sj: sj, ei: ei, ej: ej};
 
+    };
+
+
+    Grid.prototype.get = function(i,j){
+        var self = this;
+        if(self.rectSets[i] !== undefined && self.rectSets[i][j] !== undefined){
+            return self.rectSets[i][j];
+        }
+
+        return null;
     };
 
     /*
@@ -120,7 +141,7 @@
                 }
                 for (j = self.rectSets[i].length; j < cols; j++) {
                     count++;
-                    self.rectSets[i][j] = new CE.EXT.RectSet({
+                    self.rectSets[i][j] = new RectSet({
                         x: j * self.sw,
                         y: i * self.sh,
                         width: sw,
@@ -136,7 +157,7 @@
             for (j = self.rectSets[0].length; j < cols; j++) {
                 for (i = 0; i < self.rectSets.length; i++) {
                     count++;
-                    self.rectSets[i][j] = new CE.EXT.RectSet({
+                    self.rectSets[i][j] = new RectSet({
                         x: j * self.sw,
                         y: i * self.sh,
                         width: sw,
@@ -164,17 +185,33 @@
 
     Grid.prototype.draw = function(context){
         var self = this;
-        self.rectSets.forEach(function (row) {
-            row.forEach(function (rectSet) {
-                context.fillStyle = rectSet.fillStyle;
-                context.strokeStyle = rectSet.strokeStyle;
-                context.setLineDash(rectSet.lineDash);
-                context.lineWidth = rectSet.lineWidth;
-                context.fillRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
-                context.strokeRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
-            });
-        });
+        var size1 = self.rectSets.length;
+        for(var i = 0; i < size1;i++){
+            var size2 = self.rectSets[i].length;
+            for(var j = 0; j < size2;j++){
+                var rectSet = self.rectSets[i][j];
+                if(rectSet.fillStyle !== 'transparent'){
+                    context.fillStyle = rectSet.fillStyle;
+                    context.fillRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
+                }
+
+                if(rectSet.strokeStyle !== 'transparent'){
+                    context.setLineDash(rectSet.lineDash);
+                    context.lineWidth = rectSet.lineWidth;
+                    context.strokeStyle = rectSet.strokeStyle;
+                    context.strokeRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
+                }
+                if(self.drawCallback !== null){
+                    context.save();
+                    self.drawCallback(rectSet,context);
+                    context.restore();
+
+                }
+            }
+        }
+
         return self;
     };
+
     w.Grid = Grid;
 })(window);
