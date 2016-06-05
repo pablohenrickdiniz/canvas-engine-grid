@@ -2,7 +2,8 @@
     if(w.AppObject == undefined){
         throw "RectSet requires AppObject"
     }
-    else if(w.Color == undefined){
+
+    if(w.Color == undefined){
         throw "RectSet requires Color"
     }
 

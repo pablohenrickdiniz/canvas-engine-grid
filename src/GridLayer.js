@@ -2,7 +2,8 @@
     if(w.CanvasLayer == undefined){
         throw "GridLayer requires CanvasLayer"
     }
-    else if(w.Grid == undefined){
+
+    if(w.Grid == undefined){
         throw "GridLayer requires Grid"
     }
 

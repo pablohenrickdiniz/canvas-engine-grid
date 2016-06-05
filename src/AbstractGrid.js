@@ -2,7 +2,8 @@
     if(w.AppObject == undefined){
         throw "AbstractGrid requires AppObject"
     }
-    else if(w.Color == undefined){
+
+    if(w.Color == undefined){
         throw "AbstractGrid requires Color"
     }
 
