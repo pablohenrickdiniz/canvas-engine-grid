@@ -205,6 +205,7 @@
                     context.lineWidth = rect.lineWidth;
                     context.strokeStyle = rect.strokeStyle;
                     context.strokeRect(rect.x, rect.y, rect.width, rect.height);
+                    context.fillStyle = 'blue';
                     context.fontSize = '12px Arial';
                     context.fillText(i+','+j,rect.x,rect.y+8);
                 }
