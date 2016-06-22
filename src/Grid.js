@@ -206,7 +206,7 @@
                     context.strokeStyle = rect.strokeStyle;
                     context.strokeRect(rect.x, rect.y, rect.width, rect.height);
                     context.fontSize = '12px';
-                    context.fillText(i+','+j,rect.x+12,rect.y+12);
+                    context.fillText(i+','+j,rect.x+5,rect.y+5);
                 }
                 if(self.drawCallback !== null){
                     context.save();
