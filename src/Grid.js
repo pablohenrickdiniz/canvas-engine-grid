@@ -194,21 +194,22 @@
         for(var i = 0; i < size1;i++){
             var size2 = self.rectSets[i].length;
             for(var j = 0; j < size2;j++){
-                var rectSet = self.rectSets[i][j];
-                if(rectSet.fillStyle !== 'transparent'){
-                    context.fillStyle = rectSet.fillStyle;
-                    context.fillRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
+                var rect = self.rectSets[i][j];
+                if(rect.fillStyle !== 'transparent'){
+                    context.fillStyle = rect.fillStyle;
+                    context.fillRect(rect.x, rect.y, rect.width, rect.height);
                 }
 
-                if(rectSet.strokeStyle !== 'transparent'){
-                    context.setLineDash(rectSet.lineDash);
-                    context.lineWidth = rectSet.lineWidth;
-                    context.strokeStyle = rectSet.strokeStyle;
-                    context.strokeRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
+                if(rect.strokeStyle !== 'transparent'){
+                    context.setLineDash(rect.lineDash);
+                    context.lineWidth = rect.lineWidth;
+                    context.strokeStyle = rect.strokeStyle;
+                    context.strokeRect(rect.x, rect.y, rect.width, rect.height);
+                    context.text(i+','+j,rect.getCx(),rect.getCy());
                 }
                 if(self.drawCallback !== null){
                     context.save();
-                    self.drawCallback(rectSet,context);
+                    self.drawCallback(rect,context);
                     context.restore();
 
                 }

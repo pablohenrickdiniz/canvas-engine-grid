@@ -3,9 +3,6 @@
         throw "RectSet requires AppObject"
     }
 
-    if(w.Color == undefined){
-        throw "RectSet requires Color"
-    }
 
     var RectSet = function (options) {
         var self = this;
@@ -13,8 +10,8 @@
         self.height = 32;
         self.x = 0;
         self.y = 0;
-        self.fillStyle = (new Color({alpha: 0})).toRGBA();
-        self.strokeStyle = (new Color({alpha: 1})).toRGBA();
+        self.fillStyle = 'transparent';
+        self.strokeStyle = '#000000';
 
         self.lineWidth = 1;
         self.lineDash = [];
@@ -36,6 +33,16 @@
     RectSet.prototype.getColumn = function () {
         var self = this;
         return Math.floor(self.x / self.width);
+    };
+
+    RectSet.prototype.getCx = function(){
+        var self = this;
+        return self.x+(self.width/2);
+    };
+
+    RectSet.prototype.getCy = function(){
+        var self = this;
+        return self.y+(self.height/2);
     };
 
     w.RectSet = RectSet;
