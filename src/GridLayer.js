@@ -1,5 +1,9 @@
 (function(w){
-    if(w.CanvasLayer == undefined){
+    if(w.CE == undefined){
+        throw "GridLayer requires CanvasEngine"
+    }
+
+    if(CE.CanvasLayer == undefined){
         throw "GridLayer requires CanvasLayer"
     }
 
@@ -7,63 +11,71 @@
         throw "GridLayer requires Grid"
     }
 
-    var GridLayer = function (options, canvas) {
+    var CanvasLayer = CE.CanvasLayer;
+
+    /**
+     *
+     * @param options
+     * @param canvas
+     * @constructor
+     */
+    var GridLayer = function (canvas, options) {
         var self = this;
-        self.grid = null;
-        CanvasLayer.call(self, options, canvas);
+        options = options || [];
+        CanvasLayer.call(self, canvas,options);
+        initialize(self);
+        self.grid = options.grid || null;
     };
 
     GridLayer.prototype = Object.create(CanvasLayer.prototype);
     GridLayer.prototype.constructor = GridLayer;
 
-    /*
-     GridLayer : drawRectSet(RectSet set)
-     Desenha um retângulo da grade
-     */
-    GridLayer.prototype.drawRectSet = function (rectSet) {
-        //console.log('Canvas layer draw rect set...');
-        var self = this;
-        var context = self.getContext();
-
-        if(rectSet.fillStyle !== 'transparent'){
-            context.fillStyle = rectSet.fillStyle;
-            context.fillRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
-        }
-
-        if(rectSet.strokeStyle !== 'transparent'){
-            context.strokeStyle = rectSet.strokeStyle;
-            context.strokeRect(rectSet.x, rectSet.y, rectSet.width, rectSet.height);
-        }
-
-        return self;
-    };
-
-    GridLayer.prototype.getGrid = function(){
-        var self = this;
-        if(self.grid === null){
-            var width = self.width;
-            var height = self.height;
-            self.grid = new Grid({
-                sw: width,
-                sh: height,
-                width: width,
-                height: height
-            });
-        }
-        return self.grid;
-    };
-
-    GridLayer.prototype.setGrid = function(grid){
-        var self = this;
-        self.grid = grid;
-    };
-
     GridLayer.prototype.refresh = function(){
         var self = this;
         self.clear();
-        self.getGrid().draw(self.getContext(),self);
-        return self;
+        self.grid.draw(self.context,self);
     };
+
+    GridLayer.prototype.visibleArea = function(){
+        var self = this;
+        return {
+            x:self.canvas.viewX,
+            y:self.canvas.viewY,
+            width:self.width,
+            height:self.height
+        };
+    };
+
+
+    /**
+     *
+     * @param self
+     */
+    function initialize(self){
+        var grid = null;
+
+        Object.defineProperty(self,'grid',{
+            get:function(){
+                if(grid == null){
+                    var width = self.width;
+                    var height = self.height;
+                    grid = new Grid({
+                        sw: width,
+                        sh: height,
+                        width: width,
+                        height: height,
+                        parent:self
+                    });
+                }
+                return grid;
+            },
+            set:function(g){
+                if(grid != g){
+                    grid = g;
+                }
+            }
+        })
+    }
 
     w.GridLayer = GridLayer;
 })(window);

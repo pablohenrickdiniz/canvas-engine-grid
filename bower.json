@@ -15,8 +15,5 @@
     "bower_components",
     "test",
     "tests"
-  ],
-  "dependencies": {
-    "app-object": "git@github.com:pablohenrickdiniz/app-object.git"
-  }
+  ]
 }

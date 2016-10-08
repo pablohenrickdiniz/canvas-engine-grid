@@ -1,98 +1,117 @@
-(function(w){
-    if(w.AbstractGrid == undefined){
+(function (w) {
+    if (w.AbstractGrid == undefined) {
         throw "Grid requires AbstractGrid"
     }
 
-    if(w.Color == undefined){
-        throw "Grid requires Color"
-    }
 
-    if(w.RectSet == undefined){
+    if (w.RectSet == undefined) {
         throw "Grid requires RectSet"
     }
 
+    /**
+     *
+     * @param options
+     * @constructor
+     */
     var Grid = function (options) {
         console.log('initializing Grid...');
         var self = this;
-        self.rectSets = [];
+        AbstractGrid.call(self, options);
+        initialize(self);
+        self.rects = [];
         self.checkedSets = [];
         self.drawCallback = null;
-        AbstractGrid.call(self, options);
-        Grid.bindProperties.apply(self);
+        self.sx = options.sx || 0;
+        self.sy = options.sy || 0;
     };
-
 
     Grid.prototype = Object.create(AbstractGrid.prototype);
     Grid.prototype.constructor = Grid;
 
 
-    Grid.prototype.ondrawcallback = function(callback){
+    /**
+     *
+     * @param callback
+     */
+    Grid.prototype.ondrawcallback = function (callback) {
         var self = this;
         self.drawCallback = callback;
     };
 
-    Grid.bindProperties = function () {
-        var self = this;
-        self._afterChange(function () {
-            var update = false;
-            if (self._isChanged('sw') || self._isChanged('sh')) {
-                update = true;
-                self.rectSets = [];
-            }
-            if (self._isChanged('width') || self._isChanged('height')) {
-                update = true;
-            }
-            if (update) {
-                self.update();
-            }
-        });
-    };
-
+    /**
+     *
+     * @param options
+     * @returns {{si: Number, sj: Number, ei: Number, ej: Number}}
+     */
     Grid.prototype.getAreaInterval = function (options) {
         var self = this;
-        var x = parseFloat(options.x);
-        var y = parseFloat(options.y);
-        var width = parseFloat(options.width);
-        var height = parseFloat(options.height);
-
-        x = isNaN(x) ? 0 : x;
-        y = isNaN(y) ?  0: y;
-        width = isNaN(width)?0:width;
-        height = isNaN(height)?0:height;
+        var x = options.x || 0;
+        var y = options.y || 0;
+        var width = options.width || 0;
+        var height = options.height || 0;
+        var maxi = self.maxI;
+        var maxj = self.maxJ;
 
         var si = parseInt(Math.floor(y / self.sh));
         var sj = parseInt(Math.floor(x / self.sw));
         var ei = parseInt(Math.floor((y + height) / self.sh));
         var ej = parseInt(Math.floor((x + width) / self.sw));
+        si = Math.min(si, maxi);
+        sj = Math.min(sj, maxj);
+        ei = Math.min(ei, maxi);
+        ej = Math.min(ej, maxj);
+
         return {si: si, sj: sj, ei: ei, ej: ej};
 
     };
 
-
-    Grid.prototype.get = function(i,j){
+    /**
+     *
+     * @param i
+     * @param j
+     * @returns {*}
+     */
+    Grid.prototype.get = function (i, j) {
         var self = this;
-        if(self.rectSets[i] !== undefined && self.rectSets[i][j] !== undefined){
-            return self.rectSets[i][j];
+        if (i >= 0 && i <= self.maxI && j >= 0 && j <= self.maxJ) {
+            if (self.rects[i] == undefined) {
+                self.rects[i] = [];
+            }
+
+            if (!self.rects[i][j]) {
+                self.rects[i][j] = new RectSet({
+                    x: j * self.sw,
+                    y: i * self.sh,
+                    width: self.sw,
+                    height: self.sh,
+                    fillStyle: self.fillStyle,
+                    strokeStyle: self.strokeStyle,
+                    i: i,
+                    j: j
+                });
+            }
+
+            return self.rects[i][j];
         }
+
 
         return null;
     };
 
-    /*
-     Array<RectSets> : getRectsFromArea(Object object);
-     dada uma determinada, obtém todos os objetos
-     RectSets que estão presentes nessa área
+    /**
+     *
+     * @param options
+     * @returns {Array}
      */
     Grid.prototype.getRectsFromArea = function (options) {
         var rects = [];
         var self = this;
         var interval = self.getAreaInterval(options);
         for (var i = interval.si; i <= interval.ei; i++) {
-            if (self.rectSets[i] !== undefined) {
-                for (var j = interval.sj; j <= interval.ej; j++) {
-                    if (self.rectSets[i][j] !== undefined) {
-                        rects.push(self.rectSets[i][j]);
-                    }
+            for (var j = interval.sj; j <= interval.ej; j++) {
+                var rect = self.get(i, j);
+                if (rect != null) {
+                    rects.push(rect);
                 }
             }
         }
@@ -100,126 +119,127 @@
         return rects;
     };
 
-    /*
-     Grid: apply(Object options, Function conditions)
-     Aplica as propriedades options em todos os RectSets
-     que satisfazem a funçao conditions, que deve retorna
-     true ou false
+    /**
+     *
+     * @param options
+     * @param condition
+     * @returns {Grid}
      */
     Grid.prototype.apply = function (options, condition) {
         var self = this;
-        self.fillStyle = Color.isColor(options.fillStyle) ? options.fillStyle : self.fillStyle;
-        self.strokeStyle = Color.isColor(options.strokeStyle) ? options.strokeStyle : self.strokeStyle;
-        self.rectSets.forEach(function (row) {
-            row.forEach(function (rectSet) {
-                if (condition === undefined || condition.apply(rectSet)) {
-                    rectSet.set(options);
+        self.fillStyle = options.fillStyle || self.fillStyle;
+        self.strokeStyle = options.strokeStyle || self.strokeStyle;
+        for (var i = 0; i < self.maxI; i++) {
+            for (var j = 0; j < self.maxJ; j++) {
+                var rect = self.get(i, j);
+                if (condition === undefined || condition.apply(rect)) {
+                    rect.set(options);
                 }
-            });
+            }
+        }
+        return self;
+    };
+
+
+    Grid.prototype.draw = function (ctx, layer) {
+        var self = this;
+        var si = Math.floor(self.sy / self.sh);
+        var sj = Math.floor(self.sx / self.sw);
+        var ei = Math.floor((self.sy + self.height) / self.sh);
+        var ej = Math.floor((self.sx + self.width) / self.sw);
+        ei = Math.min(ei, self.maxI);
+        ej = Math.min(ej, self.maxJ);
+        var viewX = self.parent.canvas.viewX;
+        var viewY = self.parent.canvas.viewY;
+        for (var i = si; i < ei; i++) {
+            for (var j = sj; j < ej; j++) {
+                var rect = self.get(i, j);
+                if (rect != null) {
+                    var x = parseInt(rect.x+viewX);
+                    var y = parseInt(rect.y+viewY);
+
+                    if (rect.fillStyle !== 'transparent') {
+                        ctx.fillStyle = rect.fillStyle;
+                        ctx.fillRect(x, y, rect.width, rect.height);
+                    }
+
+                    if (rect.strokeStyle !== 'transparent') {
+                        ctx.setLineDash(rect.lineDash);
+                        ctx.lineWidth = rect.lineWidth;
+                        ctx.strokeStyle = rect.strokeStyle;
+                        ctx.strokeRect(x, y, rect.width, rect.height);
+                        ctx.fillStyle = 'blue';
+                        ctx.fontSize = '12px Arial';
+                        ctx.fillText(i + ',' + j, x, y + 8);
+                    }
+                    if (self.drawCallback !== null) {
+                        ctx.save();
+                        self.drawCallback(rect, ctx);
+                        ctx.restore();
+
+                    }
+                }
+            }
+        }
+
+        return self;
+    };
+
+    function initialize(self){
+        var sw = 0;
+        var sh = 0;
+        var width = 0;
+        var height = 0;
+
+        Object.defineProperty(self, 'sw', {
+            get: function () {
+                return sw;
+            },
+            set: function (s) {
+                if (s != sw) {
+                    sw = s;
+                    self.rects = [];
+                }
+            }
         });
-        return self;
-    };
 
-    /*
-     Grid : update()
-     Atualiza as dimensões da grade
-     */
-    Grid.prototype.update = function () {
-        var self = this;
-        var sw = self.sw;
-        var sh = self.sh;
-        var w = self.width;
-        var h = self.height;
-        var i;
-        var j;
-
-
-        if (w > 0 && h > 0) {
-            var cols = Math.floor(w / sw);
-            var rows = Math.floor(h / sh);
-            var count = 0;
-
-
-            for (i = self.rectSets.length; i < rows; i++) {
-                if (self.rectSets[i] === undefined) {
-                    self.rectSets[i] = [];
-                }
-                for (j = self.rectSets[i].length; j < cols; j++) {
-                    count++;
-                    self.rectSets[i][j] = new RectSet({
-                        x: j * self.sw,
-                        y: i * self.sh,
-                        width: sw,
-                        height: sh,
-                        fillStyle: self.fillStyle,
-                        strokeStyle: self.strokeStyle,
-                        i: i,
-                        j: j
-                    });
+        Object.defineProperty(self, 'sh', {
+            get: function () {
+                return sh;
+            },
+            set: function (s) {
+                if (s != sh) {
+                    sh = s;
+                    self.rects = [];
                 }
             }
+        });
 
-            for (j = self.rectSets[0].length; j < cols; j++) {
-                for (i = 0; i < self.rectSets.length; i++) {
-                    count++;
-                    self.rectSets[i][j] = new RectSet({
-                        x: j * self.sw,
-                        y: i * self.sh,
-                        width: sw,
-                        height: sh,
-                        fillStyle: self.fillStyle,
-                        strokeStyle: self.strokeStyle,
-                        i: i,
-                        j: j
-                    });
+        Object.defineProperty(self, 'width', {
+            get: function () {
+                return width;
+            },
+            set: function (w) {
+                if (w != width) {
+                    width = w;
+                    self.rects = [];
                 }
             }
+        });
 
-            for (i = 0; i < self.rectSets.length; i++) {
-                self.rectSets[i].length = cols;
-            }
-            self.rectSets.length = Math.min(rows, self.rectSets.length);
-        }
-        else {
-            self.rectSets = [];
-        }
-
-
-        return self;
-    };
-
-    Grid.prototype.draw = function(context){
-        var self = this;
-        var size1 = self.rectSets.length;
-        for(var i = 0; i < size1;i++){
-            var size2 = self.rectSets[i].length;
-            for(var j = 0; j < size2;j++){
-                var rect = self.rectSets[i][j];
-                if(rect.fillStyle !== 'transparent'){
-                    context.fillStyle = rect.fillStyle;
-                    context.fillRect(rect.x, rect.y, rect.width, rect.height);
-                }
-
-                if(rect.strokeStyle !== 'transparent'){
-                    context.setLineDash(rect.lineDash);
-                    context.lineWidth = rect.lineWidth;
-                    context.strokeStyle = rect.strokeStyle;
-                    context.strokeRect(rect.x, rect.y, rect.width, rect.height);
-                    context.fillStyle = 'blue';
-                    context.fontSize = '12px Arial';
-                    context.fillText(i+','+j,rect.x,rect.y+8);
-                }
-                if(self.drawCallback !== null){
-                    context.save();
-                    self.drawCallback(rect,context);
-                    context.restore();
-
+        Object.defineProperty(self, 'height', {
+            get: function () {
+                return height;
+            },
+            set: function (h) {
+                if (h != height) {
+                    height = h;
+                    self.rects = [];
                 }
             }
-        }
+        });
+    }
 
-        return self;
-    };
 
     w.Grid = Grid;
 })(window);
