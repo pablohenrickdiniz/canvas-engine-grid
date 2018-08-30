@@ -1,17 +1,17 @@
 (function (w) {
-    if (w.CE == undefined) {
+    if (w.CE === undefined) {
         throw "CanvasEngineGrid requires CanvasEngine"
     }
 
-    if (Math.version == undefined) {
+    if (Math.version === undefined) {
         throw "CanvasEngineGrid requires Math Lib"
     }
 
-    if (w.CE.CanvasLayer == undefined) {
+    if (w.CE.CanvasLayer === undefined) {
         throw "CanvasEngineGrid requires CanvasLayer"
     }
 
-    if (w.GridLayer == undefined) {
+    if (w.GridLayer === undefined) {
         throw "CanvasEngineGrid requires GridLayer"
     }
 
@@ -36,57 +36,11 @@
         self.lastViewX = 0;
         self.viewX = 0;
         self.viewY = 0;
-        self.eventListeners = {};
         initialize(self);
     };
 
     CanvasEngineGrid.prototype = Object.create(CE.prototype);
     CanvasEngineGrid.prototype.constructor = CanvasEngineGrid;
-
-    /**
-     *
-     * @param event
-     * @param callback
-     */
-    CanvasEngineGrid.prototype.addEventListener = function (event, callback) {
-        var self = this;
-        if (self.eventListeners[event] == undefined) {
-            self.eventListeners[event] = [];
-        }
-        if (self.eventListeners[event].indexOf(callback) == -1) {
-            self.eventListeners[event].push(callback);
-        }
-    };
-
-    /**
-     *
-     * @param event
-     * @param callback
-     */
-    CanvasEngineGrid.prototype.removeEventListener = function (event, callback) {
-        var self = this;
-        if (self.eventListeners[event] != undefined) {
-            var index = self.eventListeners[event].indexOf(callback);
-            if (index != -1) {
-                self.eventListeners[event].splice(index, 1);
-            }
-        }
-    };
-
-    /**
-     *
-     * @param event
-     * @param args
-     */
-    CanvasEngineGrid.prototype.trigger = function (event, args) {
-        var self = this;
-        if (self.eventListeners[event] != undefined) {
-            var length = self.eventListeners[event].length;
-            for (var i = 0; i < length; i++) {
-                self.eventListeners[event][i].apply(self, args);
-            }
-        }
-    };
 
     CanvasEngineGrid.prototype.getMouseReader = function () {
         var self = this;
@@ -103,7 +57,7 @@
     function initialize(self) {
         var mouseReader = self.getMouseReader();
         mouseReader.addEventListener('mousedown', function (x, y, e) {
-            if (e.which == 3) {
+            if (e.which === 3) {
                 self.lastViewX = self.viewX;
                 self.lastViewY = self.viewY;
             }
@@ -130,12 +84,12 @@
                 viewY = Math.max(viewY, self.minViewY);
                 var changed = false;
 
-                if (self.viewX != viewX) {
+                if (self.viewX !== viewX) {
                     self.viewX = viewX;
                     changed = true;
                 }
 
-                if (self.viewY != viewY) {
+                if (self.viewY !== viewY) {
                     self.viewY = viewY;
                     changed = true;
                 }
@@ -147,8 +101,8 @@
         });
 
         mouseReader.addEventListener('mousedown', function (x, y, e) {
-            if (e.which == 1) {
-                if (self.selectable && self.eventListeners['areaselect'] != undefined && self.eventListeners['areaselect'].length > 0) {
+            if (e.which === 1) {
+                if (self.selectable && self.eventListeners['areaselect'] !== undefined && self.eventListeners['areaselect'].length > 0) {
                     var area = Math.vpv(Math.sdv(self.scale, {x: x, y: y}), {
                         x: -self.viewX / self.scale,
                         y: -self.viewY / self.scale
@@ -161,7 +115,7 @@
 
 
         mouseReader.addEventListener('mousemove', function (x, y) {
-            if (self.multiSelect && self.selectable && self.eventListeners['areaselect'] != undefined && self.eventListeners['areaselect'].length > 0) {
+            if (self.multiSelect && self.selectable && self.listeners['areaselect'] !== undefined && self.listeners['areaselect'].length > 0) {
                 var reader = this;
                 var grid = self.getGridLayer().grid;
                 var area = null;
@@ -186,7 +140,7 @@
                 return minViewX;
             },
             set:function(mvx){
-                if(mvx != minViewX){
+                if(mvx !== minViewX){
                     minViewX = mvx;
                     if(self.viewX < minViewX){
                         self.viewX =  minViewX;
@@ -201,7 +155,7 @@
                 return minViewY;
             },
             set:function(mvy){
-                if(mvy != minViewY){
+                if(mvy !== minViewY){
                     minViewY = mvy;
                     if(self.viewY < minViewY){
                         self.viewY = minViewY;
@@ -249,7 +203,6 @@
         }
         return self.gridLayer;
     };
-
 
     /**
      *
