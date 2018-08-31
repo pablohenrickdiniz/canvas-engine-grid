@@ -15,7 +15,7 @@
         throw "CanvasEngineGrid requires GridLayer"
     }
 
-    var CE = w.CE,
+    let CE = w.CE,
         CanvasLayer = CE.CanvasLayer;
 
     /**
@@ -24,8 +24,8 @@
      * @param options
      * @constructor
      */
-    var CanvasEngineGrid = function (container, options) {
-        var self = this;
+    let CanvasEngineGrid = function (container, options) {
+        let self = this;
         options = options || {};
         CE.call(self, container, options);
         self.selectable = options.selectable || false;
@@ -43,7 +43,7 @@
     CanvasEngineGrid.prototype.constructor = CanvasEngineGrid;
 
     CanvasEngineGrid.prototype.getMouseReader = function () {
-        var self = this;
+        let self = this;
         if (self.mouseReader == null) {
             self.mouseReader = new Mouse(self.container);
         }
@@ -55,7 +55,7 @@
      * @param self
      */
     function initialize(self) {
-        var mouseReader = self.getMouseReader();
+        let mouseReader = self.getMouseReader();
         mouseReader.addEventListener('mousedown', function (x, y, e) {
             if (e.which === 3) {
                 self.lastViewX = self.viewX;
@@ -63,26 +63,25 @@
             }
         });
 
-
         mouseReader.addEventListener('mousemove', function (x, y) {
             if (mouseReader.right) {
-                var pa = {
+                let pa = {
                     x: mouseReader.lastDownX,
                     y: mouseReader.lastDownY
                 };
 
-                var pb = {
+                let pb = {
                     x: x,
                     y: y
                 };
 
-                var d = Math.vmv(pa, pb);
+                let d = Math.vmv(pa, pb);
 
-                var viewX = Math.min(self.lastViewX - d.x, 0);
-                var viewY = Math.min(self.lastViewY - d.y, 0);
+                let viewX = Math.min(self.lastViewX - d.x, 0);
+                let viewY = Math.min(self.lastViewY - d.y, 0);
                 viewX = Math.max(viewX, self.minViewX);
                 viewY = Math.max(viewY, self.minViewY);
-                var changed = false;
+                let changed = false;
 
                 if (self.viewX !== viewX) {
                     self.viewX = viewX;
@@ -102,23 +101,22 @@
 
         mouseReader.addEventListener('mousedown', function (x, y, e) {
             if (e.which === 1) {
-                if (self.selectable && self.eventListeners['areaselect'] !== undefined && self.eventListeners['areaselect'].length > 0) {
-                    var area = Math.vpv(Math.sdv(self.scale, {x: x, y: y}), {
+                if (self.selectable && self.listeners['areaselect'] !== undefined && self.listeners['areaselect'].length > 0) {
+                    let area = Math.vpv(Math.sdv(self.scale, {x: x, y: y}), {
                         x: -self.viewX / self.scale,
                         y: -self.viewY / self.scale
                     });
-                    var grid = self.getGridLayer().grid;
+                    let grid = self.getGridLayer().grid;
                     self.trigger('areaselect', [area, grid]);
                 }
             }
         });
 
-
         mouseReader.addEventListener('mousemove', function (x, y) {
             if (self.multiSelect && self.selectable && self.listeners['areaselect'] !== undefined && self.listeners['areaselect'].length > 0) {
-                var reader = this;
-                var grid = self.getGridLayer().grid;
-                var area = null;
+                let reader = this;
+                let grid = self.getGridLayer().grid;
+                let area = null;
                 if (reader.left) {
                     area = self.getDrawedArea();
                 }
@@ -132,13 +130,21 @@
             }
         });
 
-        var minViewX = -Infinity;
-        var minViewY = -Infinity;
+        let minViewX = -Infinity;
+        let minViewY = -Infinity;
 
         Object.defineProperty(self,'minViewX',{
+            /**
+             *
+             * @returns {number}
+             */
             get:function(){
                 return minViewX;
             },
+            /**
+             *
+             * @param mvx
+             */
             set:function(mvx){
                 if(mvx !== minViewX){
                     minViewX = mvx;
@@ -151,9 +157,17 @@
         });
 
         Object.defineProperty(self,'minViewY',{
+            /**
+             *
+             * @returns {number}
+             */
             get:function(){
                 return minViewY;
             },
+            /**
+             *
+             * @param mvy
+             */
             set:function(mvy){
                 if(mvy !== minViewY){
                     minViewY = mvy;
@@ -168,18 +182,18 @@
 
     /**
      *
-     * @returns {{x: (*|pa.x), y: (*|pa.y), width: number, height: number}}
+     * @returns {{x: number, y: number, width: number, height: number}}
      */
     CanvasEngineGrid.prototype.getDrawedArea = function () {
-        var self = this;
-        var reader = self.getMouseReader();
-        var translate = {x: -self.viewX / self.scale, y: -self.viewY / self.scale};
-        var pa = Math.vpv(Math.sdv(self.scale, {x: reader.lastDownX, y: reader.lastDownY}), translate);
-        var pb = Math.vpv(Math.sdv(self.scale, {x: reader.lastX, y: reader.lastY}), translate);
-        var width = Math.abs(pb.x - pa.x);
-        var height = Math.abs(pb.y - pa.y);
+        let self = this;
+        let reader = self.getMouseReader();
+        let translate = {x: -self.viewX / self.scale, y: -self.viewY / self.scale};
+        let pa = Math.vpv(Math.sdv(self.scale, {x: reader.lastDownX, y: reader.lastDownY}), translate);
+        let pb = Math.vpv(Math.sdv(self.scale, {x: reader.lastX, y: reader.lastY}), translate);
+        let width = Math.abs(pb.x - pa.x);
+        let height = Math.abs(pb.y - pa.y);
 
-        var area = {
+        let area = {
             x: pa.x,
             y: pa.y,
             width: width,
@@ -190,6 +204,7 @@
         area.y = pa.y > pb.y ? area.y - height : area.y;
         return area;
     };
+
     /**
      *
      * @param options
@@ -197,7 +212,7 @@
      */
     CanvasEngineGrid.prototype.getGridLayer = function (options) {
         options = options || {};
-        var self = this;
+        let self = this;
         if (self.gridLayer === null) {
             self.gridLayer = self.createLayer(options, GridLayer);
         }
@@ -209,7 +224,7 @@
      * @returns {CanvasEngineGrid}
      */
     CanvasEngineGrid.prototype.destroyGridLayer = function () {
-        var self = this;
+        let self = this;
         if (self.gridLayer !== null) {
             self.gridLayer.destroy();
             self.gridLayer = null;
@@ -225,8 +240,8 @@
      */
     CanvasEngineGrid.prototype.createLayer = function (options, ClassName) {
         options = options === undefined ? {} : options;
-        var layer = null;
-        var self = this;
+        let layer = null;
+        let self = this;
         options.zIndex = self.layers.length;
         options.width = options.width || self.width;
         options.height = options.height || self.height;
@@ -241,7 +256,7 @@
         self.layers.push(layer);
 
         if (self.gridLayer !== null) {
-            var newLayer = self.layers[self.layers.length - 1];
+            let newLayer = self.layers[self.layers.length - 1];
             self.layers[self.layers.length - 1] = self.gridLayer;
             self.layers[self.gridLayer.zIndex] = newLayer;
 
@@ -260,9 +275,9 @@
      * @returns {CanvasEngineGrid}
      */
     CanvasEngineGrid.prototype.removeLayer = function (layer) {
-        var self = this;
+        let self = this;
 
-        var index = -1;
+        let index = -1;
         if (!(layer instanceof GridLayer) && layer instanceof CanvasLayer) {
             index = self.layers.indexOf(layer);
         }
@@ -273,7 +288,7 @@
         if (index !== -1) {
             self.layers[index].destroy();
             self.layers.splice(index, 1);
-            for (var i = index; i < self.layers.length; i++) {
+            for (let i = index; i < self.layers.length; i++) {
                 self.layers[i].set({
                     zIndex: i
                 });

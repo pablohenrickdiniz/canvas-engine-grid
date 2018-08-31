@@ -4,8 +4,8 @@
      * @param options
      * @constructor
      */
-    var RectSet = function (options) {
-        var self = this;
+    let RectSet = function (options) {
+        let self = this;
         options = options || {};
         self.width = options.width || 32;
         self.height = options.height || 32;
@@ -26,8 +26,8 @@
      */
     RectSet.prototype.set = function(options){
         options = options || {};
-        var self =this;
-        for(var prop in options){
+        let self =this;
+        for(let prop in options){
             self[prop] = options[prop];
         }
     };
@@ -37,7 +37,7 @@
      * @returns {number}
      */
     RectSet.prototype.getLine = function () {
-        var self = this;
+        let self = this;
         return Math.floor(self.y / self.height);
     };
 
@@ -46,7 +46,7 @@
      * @returns {number}
      */
     RectSet.prototype.getColumn = function () {
-        var self = this;
+        let self = this;
         return Math.floor(self.x / self.width);
     };
 
@@ -55,7 +55,7 @@
      * @returns {number}
      */
     RectSet.prototype.getCx = function(){
-        var self = this;
+        let self = this;
         return self.x+(self.width/2);
     };
 
@@ -64,7 +64,7 @@
      * @returns {number}
      */
     RectSet.prototype.getCy = function(){
-        var self = this;
+        let self = this;
         return self.y+(self.height/2);
     };
 

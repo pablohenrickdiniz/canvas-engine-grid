@@ -1,7 +1,8 @@
+'use strict';
 (function(w){
-    var AbstractGrid = function (options) {
+    let AbstractGrid = function (options) {
         console.log('initializing Abstract Grid...');
-        var self = this;
+        let self = this;
         initialize(self);
         options = options || {};
         self.x = options.x || 0;
@@ -11,61 +12,120 @@
         self.sw = options.sw || 0;
         self.sh = options.sh || 0;
         self.parent = options.parent || 0;
-        self.fillStyle = options.fillStyle || 'transarent';
+        self.fillStyle = options.fillStyle || 'transparent';
         self.strokeStyle = options.strokeStyle || '#000000';
         self.checkedArea = null;
+        self.listeners = [];
     };
 
     AbstractGrid.prototype.isDrawable = function () {
 
     };
 
-    AbstractGrid.prototype.draw = function(context,layer){
-        var viewX = layer.canvas.viewX;
-        var viewY = layer.canvas.viewY;
-        var width = layer.canvas.width;
-        var height = layer.canvas.height;
+    /**
+     *
+     * @param event
+     * @param callback
+     */
+    AbstractGrid.prototype.addEventListener = function (event, callback) {
+        let self = this;
+        if (self.listeners[event] === undefined) {
+            self.listeners[event] = [];
+        }
 
-        var visibleArea = {
+        if (self.listeners[event].indexOf(callback) === -1) {
+            self.listeners[event].push(callback);
+        }
+    };
+
+    /**
+     *
+     * @param event
+     * @param callback
+     */
+    AbstractGrid.prototype.removeEventListener = function (event, callback) {
+        let self = this;
+        if (self.listeners[event] !==  undefined) {
+            let index = self.listeners[event].indexOf(callback);
+            if (index !==  -1) {
+                self.listeners[event].splice(index, 1);
+            }
+        }
+    };
+
+    /**
+     *
+     * @param event
+     * @param args
+     */
+    AbstractGrid.prototype.trigger = function (event, args) {
+        let self = this;
+        if (self.listeners[event] !== undefined) {
+            let length = self.listeners[event].length;
+            for (let i = 0; i < length; i++) {
+                self.listeners[event][i].apply(self, args);
+            }
+        }
+    };
+
+    AbstractGrid.prototype.draw = function(context,layer){
+        let viewX = layer.canvas.viewX;
+        let viewY = layer.canvas.viewY;
+        let width = layer.canvas.width;
+        let height = layer.canvas.height;
+
+        let visibleArea = {
             x:-viewX,
             y:-viewY,
             width:width,
             height:height
         };
-        var self = this;
-        var sj = Math.floor(visibleArea.x/self.sw);
-        var si =  Math.floor(visibleArea.y/self.sh);
-        var ej = Math.ceil((visibleArea.x+visibleArea.width)/self.sw);
-        var ei = Math.ceil((visibleArea.y+visibleArea.height)/self.sh);
-        var maxi = self.maxI;
-        var maxj = self.maxJ;
+        let self = this;
+        let sj = Math.floor(visibleArea.x/self.sw);
+        let si =  Math.floor(visibleArea.y/self.sh);
+        let ej = Math.ceil((visibleArea.x+visibleArea.width)/self.sw);
+        let ei = Math.ceil((visibleArea.y+visibleArea.height)/self.sh);
+        let maxi = self.maxI;
+        let maxj = self.maxJ;
 
         si = Math.min(si,maxi);
         sj = Math.min(sj,maxj);
         ei = Math.min(ei,maxi);
         ej = Math.min(ej,maxj);
 
-        for(var i = si; i < ei;i++){
-            for(var j = sj; j < ej;j++){
+        for(let i = si; i < ei;i++){
+            for(let j = sj; j < ej;j++){
                context.strokeRect(j*self.sw+viewX,i*self.sh+viewY,self.sw,self.sh);
             }
         }
     };
 
+    /**
+     *
+     * @param self
+     */
     function initialize(self){
-        var sw = 0;
-        var sh = 0;
-        var width = 0;
-        var height = 0;
+        let sw = 0;
+        let sh = 0;
+        let width = 0;
+        let height = 0;
 
 
         Object.defineProperty(self, 'maxI', {
+            /**
+             *
+             * @returns {number}
+             */
             get: function () {
                 return Math.floor(self.height / self.sh);
             }
         });
 
         Object.defineProperty(self, 'maxJ', {
+            /**
+             *
+             * @returns {number}
+             */
             get: function () {
                 return Math.floor(self.width / self.sw);
             }
@@ -73,11 +133,19 @@
 
         Object.defineProperty(self, 'sw', {
             configurable:true,
+            /**
+             *
+             * @returns {number}
+             */
             get: function () {
                 return sw;
             },
+            /**
+             *
+             * @param s
+             */
             set: function (s) {
-                if (s != sw) {
+                if (s !== sw) {
                     sw = s;
                 }
             }
@@ -85,11 +153,19 @@
 
         Object.defineProperty(self, 'sh', {
             configurable:true,
+            /**
+             *
+             * @returns {number}
+             */
             get: function () {
                 return sh;
             },
+            /**
+             *
+             * @param s
+             */
             set: function (s) {
-                if (s != sh) {
+                if (s !== sh) {
                     sh = s;
                 }
             }
@@ -97,11 +173,19 @@
 
         Object.defineProperty(self, 'width', {
             configurable:true,
+            /**
+             *
+             * @returns {number}
+             */
             get: function () {
                 return width;
             },
+            /**
+             *
+             * @param w
+             */
             set: function (w) {
-                if (w != width) {
+                if (w !== width) {
                     width = w;
                 }
             }
@@ -109,11 +193,19 @@
 
         Object.defineProperty(self, 'height', {
             configurable:true,
+            /**
+             *
+             * @returns {number}
+             */
             get: function () {
                 return height;
             },
+            /**
+             *
+             * @param h
+             */
             set: function (h) {
-                if (h != height) {
+                if (h !== height) {
                     height = h;
                 }
             }
